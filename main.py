@@ -1,6 +1,16 @@
 import pandas as pd
 import plotly.graph_objects as go
 
+
+def calcula_imposto( resultado_auferido_mes ):
+    if resultado_auferido_mes > 0:
+        return resultado_auferido_mes * 0.15
+    return 0
+            
+        
+    
+
+
 df = pd.read_csv('stocks-dataset.csv')
 
 carteira = pd.DataFrame(columns=['Data', 'Nome', 'Preco Medio', 'Quantidade Media', 'Oper','Resultado Auferido', 'Lucro/Prejuizo'])
@@ -38,7 +48,7 @@ for index, row in df.iterrows():
                 carteira.loc[index] = [data_operacao, acao, preco_medio, quantidade_media,operacao, resultado_auferido, lucro_prejuizo]
         
 
-print(carteira)
+
 
 
 
