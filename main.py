@@ -1,25 +1,15 @@
 import pandas as pd
 import plotly.graph_objects as go
-# from carteira import Carteira
-# from acoes import Acoes
-# from calculadoraImpostoRenda import CalculadoraImpostoRendaPadrao
 
-
-
-
-# # Criando a carteira
-# calculadora = CalculadoraImpostoRendaPadrao()
-# carteira = Carteira(calculadora)
-
-# Lendo o arquivo CSV com pandas
 df = pd.read_csv('stocks-dataset.csv')
 
-carteira = pd.DataFrame(columns=['Data', 'Nome', 'Preco Medio', 'Quantidade Media', 'Resultado Auferido'])
+carteira = pd.DataFrame(columns=['Data', 'Nome', 'Preco Medio', 'Quantidade Media', 'Oper','Resultado Auferido', 'Lucro/Prejuizo'])
 
 
-# Iterando sobre as linhas do DataFrame
 preco_medio = 0
 quantidade_media = 0
+lucro_prejuizo = 0   
+
 for index, row in df.iterrows():
     data_operacao = row['Data da operação']
     operacao = row['Operação']
@@ -27,37 +17,33 @@ for index, row in df.iterrows():
     preco = row['Preço']
     quantidade = row['Quantidade']
     taxa_corretagem = row['Taxa de corretagem']
-#     carteira.loc[0] = [ '21/05/2021', 'PTBR4', 0, 0, 0]
-#     carteira.loc[1] = [ '21/05/2021', 'PTBR4', 200, 150, 0]
-#     carteira.loc[2] = [ '22/05/2021', 'PTBR4', 300, 150, 0]
-
-
 
     if  carteira.loc[carteira['Nome'] == acao].empty:
-        carteira.loc[index] = [data_operacao, acao, round(preco,2), quantidade, 0]
+        preco_medio = ( (preco * quantidade) + taxa_corretagem) / (quantidade)    
+        carteira.loc[index] = [data_operacao, acao, preco_medio, quantidade, operacao, 0, lucro_prejuizo]
     else:
-        preco_medio_tmp = carteira.loc[carteira['Nome'] == acao, 'Preco Medio'].values[0]
-        quantidade_media_tmp = carteira.loc[carteira['Nome'] == acao, 'Quantidade Media'].values[0]
+        preco_medio_tmp = carteira.loc[carteira['Nome'] == acao, 'Preco Medio'].values[-1]
+        quantidade_media_tmp = carteira.loc[carteira['Nome'] == acao, 'Quantidade Media'].values[-1]
+        resultado_auferido_temp = carteira.loc[carteira['Nome'] == acao, 'Resultado Auferido'].values[-1]
+        
         if operacao  == 'Compra': 
                 preco_medio = ((preco_medio_tmp * quantidade_media_tmp) + (preco * quantidade) + taxa_corretagem) / (quantidade_media_tmp + quantidade)
                 quantidade_media = quantidade_media_tmp + quantidade
+                carteira.loc[index] = [data_operacao, acao, preco_medio, quantidade_media,operacao, resultado_auferido_temp, lucro_prejuizo]
         else:
-                resultado_auferido = (preco - preco_medio_tmp) * (quantidade - taxa_corretagem)
+                preco_medio = preco_medio_tmp
                 quantidade_media = quantidade_media_tmp - quantidade
-                
-                
+                resultado_auferido = (preco - preco_medio_tmp)*quantidade - taxa_corretagem
+                lucro_prejuizo = resultado_auferido + lucro_prejuizo
+                carteira.loc[index] = [data_operacao, acao, preco_medio, quantidade_media,operacao, resultado_auferido, lucro_prejuizo]
         
-        
-        carteira.loc[index] = [data_operacao, acao, preco_medio, quantidade_media, 0]
-        
-    
+
 print(carteira)
 
 
 
 
-
-    # Verificando se o investimento já existe na carteira ou criando um novo
+# Verificando se o investimento já existe na carteira ou criando um novo
     
 
 
