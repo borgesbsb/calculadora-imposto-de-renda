@@ -18,6 +18,32 @@ class Calculadora:
 
     def total_venda():
         return self.carteira.loc[self.carteira['Oper'] == 'Venda', 'Quantidade'].sum()
+    
+    def calcular_resumo_mensal(self):
+        output1 = pd.DataFrame(columns=['Mes', 'Compra/R$', 'Venda/R$',
+                                        'Rendimento Bruto/R$', 'Imposto/R$', 'Rendimento Liquido/R$'])
+
+        output1['Mes'] = self.carteira['Data'].dt.month_name().unique()
+
+        for index, row in output1.iterrows():
+            mes = row['Mes']
+            compras_df = self.carteira[(self.carteira['Oper'] == 'Compra') & (
+                self.carteira['Data'].dt.month_name() == mes)]
+            valor_compra_total = compras_df['Valor Executado'].sum()
+            vendas_df = self.carteira[(self.carteira['Oper'] == 'Venda') & (
+                self.carteira['Data'].dt.month_name() == mes)]
+            valor_vendas_total = vendas_df['Valor Executado'].sum()
+            rendimento_absoluto_bruto = self.carteira[self.carteira['Data'].dt.month_name(
+            ) == mes].loc[:, 'Resultado Auferido'].sum()
+            imposto_devido = self.calcula_imposto(
+                rendimento_absoluto_bruto) if rendimento_absoluto_bruto > 0 else 0
+            rendimento_liquido = rendimento_absoluto_bruto - imposto_devido
+            output1.loc[index] = [mes, valor_compra_total, valor_vendas_total,
+                                  rendimento_absoluto_bruto, imposto_devido, rendimento_liquido]
+
+        output1 = output1.round(2)
+        output1 = output1.applymap(lambda x: '{:.2f}'.format(x) if isinstance(x, (int, float)) else x)
+        return output1
 
     def calcular_carteira(self):
         preco_medio = 0
