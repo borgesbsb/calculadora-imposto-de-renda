@@ -1,15 +1,20 @@
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 import dash_bootstrap_components as dbc
-from scrapping import NewsScraper
+import asyncio
+from scraping import NewsScraper
 
 
 class Grafico:
-    def __init__(self, calculadora, output1):
+    def __init__(self, calculadora, output1, scraper, chatgpt):
         self.output1 = output1
         self.calculadora = calculadora
         self.chart1 = None
         self.chart2 = None
+        self.scraper = scraper
+        self.chatgpt = chatgpt
+        self.contexto = {}
+        self.obter_scrape()
 
     def criar_grafico_linha(self):
         self.chart1 = px.line(self.output1, x='Mes', y=['Compra/R$', 'Venda/R$', 'Rendimento Bruto/R$', 'Imposto/R$', 'Rendimento Liquido/R$'])
@@ -40,7 +45,7 @@ class Grafico:
                 }
             )
             graficos[acao] = grafico
-            
+
         imposto_data = self.output1[['Mes', 'Imposto/R$']]
         grafico_imposto = px.bar(imposto_data, x='Mes', y='Imposto/R$', title='Imposto de Renda a Pagar')
         grafico_imposto.update_layout(
@@ -61,6 +66,20 @@ class Grafico:
         options.append({'label': 'Chart - Rendimento por Mês', 'value': 'chart1'})
         options.append({'label': 'Chart - Imposto de Renda a Pagar', 'value': 'Imposto de Renda'})
         return options
+    
+    def obter_scrape(self):
+        for acao in self.calculadora.carteira['Nome'].unique():
+                contexto = self.scraper.obter_ultimas_noticias(acao)
+                self.contexto[acao] = contexto
+
+    def obter_informacoes(self, acao):
+        contexto = self.contexto.get(acao)
+        if contexto is None:
+                contexto = self.scraper.obter_ultimas_noticias(acao)
+        
+        self.contexto[acao] = contexto
+
+        return self.chatgpt.realizar_consulta(acao, contexto)
 
     def explicar_desempenho(self, acao):
         if acao == 'chart1':
@@ -68,15 +87,11 @@ class Grafico:
         elif acao == 'Imposto de Renda':
             informacoes = "Informações para Chart - Imposto de Renda a Pagar"
         elif acao != None:
-            scraping = NewsScraper()
-            papeis = ['PETR4']
-            scraping.obter_ultimas_noticias(papeis)    
-            informacoes = f"Informações para Chart - {acao}"
+            informacoes = self.obter_informacoes(acao)
         else:
             informacoes = "Nenhuma informação disponível"
 
         return informacoes
-
 
     def criar_dashboard(self):
         self.criar_grafico_linha()
@@ -99,7 +114,7 @@ class Grafico:
                         dcc.Dropdown(
                             id='combo-box',
                             options=self.criar_dropdown_options(),
-                            value='Imposto de Renda'
+                            value=''
                         ),
                         width=3,
                         style={'margin-top': '7px'}
@@ -122,10 +137,11 @@ class Grafico:
             ),
             dbc.Row(
                 [
-                   dbc.Col(
+                    dbc.Col(
                         dbc.Alert(
-                            [
-                                html.Img(src="./assets/chatgpt.png", className="chatgpt",style={"width": "50px", "height": "50px"}),
+                            [   
+                                html.H4("Baseada nas Últimas 10 Nóticias - Análise do ChatGPT"),  
+                                html.Img(src="./assets/chatgpt.png", className="chatgpt", style={"width": "50px", "height": "50px"}),
                                 html.Div(id='explicacao-desempenho')
                             ],
                             color="info",
@@ -142,14 +158,13 @@ class Grafico:
         ])
 
         @app.callback(
-            Output('graph', 'figure'),
-            Output('explicacao-desempenho', 'children'),
-            Input('combo-box', 'value')
+            [Output('graph', 'figure'), Output('explicacao-desempenho', 'children',allow_duplicate=True)],
+            Input('combo-box', 'value'),
+            prevent_initial_call=True
         )
-        def update_graph(selected_chart):
-            explicacao = self.explicar_desempenho(selected_chart)
+        def update_graph_and_explicacao(selected_chart):
             if selected_chart == 'chart1':
-                explicacao = self.explicar_desempenho("Mês")
+                explicacao = self.explicar_desempenho("chart1")
                 return self.chart1, explicacao
             elif selected_chart == 'Imposto de Renda':
                 explicacao = self.explicar_desempenho("Imposto de Renda")
@@ -159,13 +174,7 @@ class Grafico:
                 return self.chart2[selected_chart], explicacao
             else:
                 return self.chart2[selected_chart], explicacao
+
         
-        @app.callback(
-                Output('explicacao-desempenho', 'children'),
-                Input('combo-box', 'value')
-        )
-        def update_explicacao(selected_chart):
-                explicacao = self.explicar_desempenho(selected_chart)
-                return explicacao
 
         app.run_server(debug=True)
