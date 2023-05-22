@@ -30,19 +30,35 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ## Como executar o projeto
 
-1. Instale as dependências do projeto executando o comando `pip install -r requirements.txt`.
-2. Execute o arquivo `main.py` para iniciar o aplicativo Dash.
-3. Acesse o aplicativo no navegador utilizando o endereço `http://localhost:8050`.
-4. Selecione as opções desejadas para visualizar os gráficos e as informações sobre as ações.
+Siga as instruções abaixo para executar o projeto:
 
-## Limitações e melhorias futuras
+1. Clone o repositório do projeto executando o seguinte comando:
+```shell
+git clone https://github.com/borgesbsb/calculadora-imposto-de-renda.git
+```
 
-- A calculadora de investimentos atualmente suporta apenas operações de compra e venda de ações. Futuramente, poderia ser expandida para incluir outros tipos de operações,
+2. Navegue até o diretório do projeto:
+```shell
+cd calculadora-imposto-de-renda
+```
 
- como dividendos, juros sobre capital próprio, entre outros.
+3. Instale as dependências do projeto executando o comando:
+```shell
+pip install -r requirements.txt
+```
+
+4. Execute o comando abaixo para iniciar a aplicação:
+```shell
+python main.py
+```
+
+5. Acesse o aplicativo no navegador utilizando o endereço `http://localhost:8050`.
+
+## Limitações e melhorias
+
+É importante mencionar algumas limitações do projeto e possíveis melhorias futuras:
+
+- O cálculo do imposto devido considera apenas a alíquota padrão para operações de venda de ações. Poderia ser implementada uma lógica mais complexa para considerar diferentes alíquotas de acordo com o valor da venda e o prazo de permanência na carteira.
 - A obtenção de informações sobre as ações é realizada através de scraping de notícias utilizando o modelo OpenAI GPT-3.5. Essa abordagem pode ter algumas limitações e não garante a precisão das informações. Poderia ser implementada uma integração com uma API de dados financeiros para obter informações mais confiáveis.
 - O aplicativo Dash atualmente possui uma interface básica. Poderia ser aprimorado com recursos adicionais, como filtros de data, seleção de ações, entre outros.
-- A geração de gráficos atualmente é feita com base em dados simulados. Poderia ser implementada uma integração com uma fonte de dados em tempo real para obter informações mais atualizadas sobre o desempenho das ações.
 
-
- 
