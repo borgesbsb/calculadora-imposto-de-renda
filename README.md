@@ -46,8 +46,9 @@ cd calculadora-imposto-de-renda
 ```shell
 pip install -r requirements.txt
 ```
+4. Insira a chave de API criada em  https://platform.openai.com/account/api-keys` no arquivo main.py no parametro "key_openai". 
 
-4. Execute o comando abaixo para iniciar a aplicação:
+5. Execute o comando abaixo para iniciar a aplicação:
 ```shell
 python main.py
 ```
