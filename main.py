@@ -13,7 +13,9 @@ output1.to_csv('informações_consolidadas.csv', index=False)
 
 scraper = NewsScraper()
 
-chatgpt = OpenAIChat(api_key='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')
+key_openai = ""
+
+chatgpt = OpenAIChat(api_key=key_openai)
 
 output2 = Grafico(calculadora, output1, scraper, chatgpt)
 

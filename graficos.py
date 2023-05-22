@@ -78,7 +78,9 @@ class Grafico:
                 contexto = self.scraper.obter_ultimas_noticias(acao)
         
         self.contexto[acao] = contexto
-
+        if self.chatgpt.api_key == "":
+            return "Insira a chave openai no arquivo main.py"
+        
         return self.chatgpt.realizar_consulta(acao, contexto)
 
     def explicar_desempenho(self, acao):

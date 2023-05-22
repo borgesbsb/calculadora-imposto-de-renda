@@ -1,6 +1,7 @@
 import openai
 class OpenAIChat:
     def __init__(self, api_key):
+        self.api_key = api_key
         openai.api_key = api_key
 
     def realizar_consulta(self, pergunta, contexto, max_tokens=600):
